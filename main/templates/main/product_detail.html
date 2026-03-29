@@ -1,0 +1,114 @@
+<main class="mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-8">
+        <a href="{% url 'main:index' %}" 
+           hx-get="{% url 'main:index' %}"
+           hx-target="#main-content"
+           hx-push-url="true"
+           class="hover:text-gray-900 uppercase">Home</a>
+        <span>/</span>
+        {% if current_category %}
+        <a href="{% url 'main:catalog' current_category %}"
+           hx-get="{% url 'main:catalog' current_category %}"
+           hx-target="#main-content"
+           hx-push-url="true"
+           class="hover:text-gray-900 uppercase">{{ current_category }}</a>
+        <span>/</span>
+        {% endif %}
+        <span class="text-gray-900 uppercase">{{ object.name }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Images -->
+        <div>
+            <div class="aspect-square overflow-hidden bg-gray-100 mb-4">
+                {% if object.main_image %}
+                <img src="{{ object.main_image.url }}"
+                     alt="{{ object.name }}"
+                     class="w-full h-full object-cover"
+                     id="main-product-image">
+                {% endif %}
+            </div>
+            <!-- Thumbnail Images -->
+            <div class="grid grid-cols-4 gap-2">
+                {% if object.main_image %}
+                <img src="{{ object.main_image.url }}"
+                     alt="{{ object.name }}"
+                     class="aspect-square object-cover cursor-pointer border-2 border-black"
+                     onclick="document.getElementById('main-product-image').src=this.src">
+                {% endif %}
+                {% for image in object.images.all %}
+                <img src="{{ image.image.url }}"
+                     alt="{{ object.name }}"
+                     class="aspect-square object-cover cursor-pointer border-2 border-transparent hover:border-black"
+                     onclick="document.getElementById('main-product-image').src=this.src">
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div>
+            <h1 class="text-2xl font-bold uppercase mb-2">{{ object.name }}</h1>
+            <p class="text-gray-600 uppercase mb-4">{{ object.color }}</p>
+            <p class="text-2xl font-medium mb-8">${{ object.price }}</p>
+
+            <!-- Sizes -->
+            {% if object.product_size.all %}
+            <div class="mb-6">
+                <h3 class="text-sm font-medium uppercase mb-3">Size</h3>
+                <div class="grid grid-cols-4 gap-2">
+                    {% for ps in object.product_size.all %}
+                    <button class="border border-gray-300 py-2 text-sm font-medium uppercase hover:border-black transition-colors
+                                   {% if ps.stock == 0 %}opacity-50 cursor-not-allowed{% endif %}">
+                        {{ ps.size.name }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Buttons -->
+            <button class="w-full bg-black text-white py-4 text-sm font-medium uppercase hover:bg-gray-800 transition-colors mb-4">
+                ADD TO CART
+            </button>
+            <button class="w-full border border-black py-4 text-sm font-medium uppercase hover:bg-gray-100 transition-colors mb-8">
+                ADD TO WISHLIST
+            </button>
+
+            <!-- Description -->
+            {% if object.description %}
+            <div class="mb-6">
+                <h3 class="text-sm font-medium uppercase mb-3">DETAILS</h3>
+                <p class="text-sm text-gray-600">{{ object.description }}</p>
+                <p class="text-sm text-gray-400 mt-2">Created: {{ object.created_at|date:"F d, Y" }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="mt-16">
+        <h2 class="text-xl font-bold uppercase mb-8">You May Also Like</h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for product in related_products %}
+            <div class="product-card cursor-pointer"
+                 hx-get="{% url 'main:product_detail' product.slug %}"
+                 hx-target="#main-content"
+                 hx-push-url="true">
+                <div class="aspect-square overflow-hidden bg-gray-100 mb-3">
+                    {% if product.main_image %}
+                    <img src="{{ product.main_image.url }}"
+                         alt="{{ product.name }}"
+                         class="product-image w-full h-full object-cover">
+                    {% endif %}
+                </div>
+                <h3 class="text-sm font-medium uppercase">{{ product.name }}</h3>
+                <p class="text-sm text-gray-600 uppercase">{{ product.color }}</p>
+                <p class="text-sm font-medium">${{ product.price }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</main>
